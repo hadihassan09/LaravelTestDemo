@@ -1,58 +1,131 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Task Manager
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A small task manager built with Laravel 13 and Filament 5, using MySQL for storage.
 
-## About Laravel
+You can create, edit and delete tasks, and reorder them by dragging rows in the table. The order is saved as the task priority: the task at the top is #1, the one below it is #2, and so on. Tasks can also belong to a project. There's a Projects screen for managing them, and a project dropdown above the tasks table to show only that project's tasks.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+The whole UI is a Filament panel served from the site root, so `/` takes you to the login page and then to the task list.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Requirements
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- PHP 8.3 or newer, with the extensions Laravel needs plus `intl` and `pdo_mysql`
+- Composer 2
+- MySQL 8
 
-## Learning Laravel
+Node isn't needed. Filament ships its own compiled assets, and they get published into `public/` when you run `composer install`.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Local setup
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+Clone the repo and install the PHP dependencies:
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+git clone <repository-url> task-manager
+cd task-manager
+composer install
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Create your `.env` file and generate the app key:
 
-## Contributing
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+On Windows (cmd) use `copy .env.example .env` instead of `cp`.
 
-## Code of Conduct
+Create an empty MySQL database:
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```sql
+CREATE DATABASE task_manager CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
 
-## Security Vulnerabilities
+Then update the database settings in `.env` to match your MySQL server:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```dotenv
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=task_manager
+DB_USERNAME=root
+DB_PASSWORD=
+```
 
-## License
+Run the migrations and seed the demo user:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+php artisan migrate --seed
+```
+
+Start the dev server:
+
+```bash
+php artisan serve
+```
+
+Open http://localhost:8000 and log in with the demo account:
+
+| Email              | Password   |
+| ------------------ | ---------- |
+| demo@example.com   | password   |
+
+## How priority works
+
+- A new task always goes to the bottom of the list.
+- Click the reorder button (the arrows icon above the table), drag rows into place, then click it again to finish. Priorities are rewritten from top to bottom as you drop.
+- Deleting a task moves everything below it up by one, so there are no gaps.
+- Priority is one list across all tasks. When you pick a project in the dropdown, its tasks keep their overall numbers (you might see #2, #5, #6). Reordering in that view only shuffles those tasks between the positions they already hold, so tasks in other projects don't move.
+- Deleting a project doesn't delete its tasks. They stay in the list with no project.
+
+## Deployment
+
+These steps assume a typical Linux server with PHP-FPM behind Nginx or Apache.
+
+1. Get the code onto the server and install dependencies without the dev packages:
+
+   ```bash
+   composer install --no-dev --optimize-autoloader
+   ```
+
+2. Create `.env` from `.env.example` and set it up for production. Run `php artisan key:generate` on the first deploy only, because changing the key later logs everyone out.
+
+   ```dotenv
+   APP_ENV=production
+   APP_DEBUG=false
+   APP_URL=https://your-domain.com
+
+   DB_HOST=...
+   DB_DATABASE=...
+   DB_USERNAME=...
+   DB_PASSWORD=...
+   ```
+
+3. Run the migrations. `--force` is required in production:
+
+   ```bash
+   php artisan migrate --force
+   ```
+
+4. Cache config, routes, views and events. This also runs `filament:optimize`, which caches Filament's components and icons:
+
+   ```bash
+   php artisan optimize
+   ```
+
+   Run it again after every deploy. If you change `.env` later, run `php artisan optimize:clear` and then `php artisan optimize`.
+
+5. Point the web server's document root at the `public/` directory, not the project root. For Nginx that's `root /var/www/task-manager/public;`, and for Apache it's `DocumentRoot /var/www/task-manager/public`.
+
+6. Make sure the web server user can write to `storage/` and `bootstrap/cache/`:
+
+   ```bash
+   sudo chown -R www-data:www-data storage bootstrap/cache
+   sudo chmod -R 775 storage bootstrap/cache
+   ```
+
+7. Create a user to log in with. The demo seeder is only meant for local use.
+
+   ```bash
+   php artisan make:filament-user
+   ```
+
+   It asks for a name, email and password. Every user can access the panel.
