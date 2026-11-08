@@ -1,9 +1,9 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/laravel",
+    "name": "hadihassan/task-manager",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
+    "description": "Simple task manager built with Laravel and Filament.",
+    "keywords": ["laravel", "filament", "tasks"],
     "license": "MIT",
     "require": {
         "php": "^8.3",
