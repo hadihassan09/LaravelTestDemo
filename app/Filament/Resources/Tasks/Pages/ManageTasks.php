@@ -15,7 +15,10 @@ class ManageTasks extends ManageRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make(),
+            CreateAction::make()
+                ->fillForm(fn (): array => [
+                    'project_id' => $this->tableFilters['project']['value'] ?? null,
+                ]),
         ];
     }
 
