@@ -61,6 +61,13 @@ class TaskResource extends Resource
             ])
             ->defaultSort('priority')
             ->reorderable('priority')
+            ->filters([
+                SelectFilter::make('project')
+                    ->relationship('project', 'name')
+                    ->placeholder('All projects')
+                    ->preload(),
+            ], layout: FiltersLayout::AboveContent)
+            ->deferFilters(false)
             ->recordActions([
                 EditAction::make(),
                 DeleteAction::make(),
