@@ -2,7 +2,7 @@
 
 A small task manager built with Laravel 13 and Filament 5, using MySQL for storage.
 
-You can create, edit and delete tasks, and reorder them by dragging rows in the table. The order is saved as the task priority: the task at the top is #1, the one below it is #2, and so on. Tasks can also belong to a project. There's a Projects screen for managing them, and a project dropdown above the tasks table to show only that project's tasks.
+You can create, edit and delete tasks, and reorder them by dragging rows in the table. The order is saved as the task priority: the task at the top is #1, the one below it is #2, and so on. Tick the "Done" checkbox on a row to mark a task as completed. Tasks can also belong to a project. There's a Projects screen for managing them, and a project dropdown above the tasks table to show only that project's tasks.
 
 The whole UI is a Filament panel served from the site root, so `/` takes you to the login page and then to the task list.
 
@@ -75,6 +75,12 @@ Open http://localhost:8000 and log in with the demo account:
 - Deleting a task moves everything below it up by one, so there are no gaps.
 - Priority is one list across all tasks. When you pick a project in the dropdown, its tasks keep their overall numbers (you might see #2, #5, #6). Reordering in that view only shuffles those tasks between the positions they already hold, so tasks in other projects don't move.
 - Deleting a project doesn't delete its tasks. They stay in the list with no project.
+
+## Completing tasks
+
+- Tick "Done" on a row to complete a task, and untick it to reopen it. The time it was completed is saved in `completed_at`. Hover over the checkbox to see it.
+- Completed tasks keep their priority and stay in the list with their name greyed out.
+- Use the Status dropdown above the table to show only open or only completed tasks. It works together with the project dropdown.
 
 ## Deployment
 
