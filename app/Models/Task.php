@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['name', 'project_id'])]
+#[Fillable(['name', 'project_id', 'completed_at'])]
 class Task extends Model
 {
     protected static function booted(): void
@@ -24,6 +24,18 @@ class Task extends Model
         static::deleted(function (Task $task) {
             static::where('priority', '>', $task->priority)->decrement('priority');
         });
+    }
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'completed_at' => 'datetime',
+        ];
     }
 
     public function project(): BelongsTo
