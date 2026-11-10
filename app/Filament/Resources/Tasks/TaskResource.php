@@ -18,6 +18,7 @@ use Filament\Tables\Columns\CheckboxColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 
 class TaskResource extends Resource
@@ -75,6 +76,12 @@ class TaskResource extends Resource
                     ->relationship('project', 'name')
                     ->placeholder('All projects')
                     ->preload(),
+                TernaryFilter::make('completed_at')
+                    ->label('Status')
+                    ->nullable()
+                    ->placeholder('All tasks')
+                    ->trueLabel('Completed')
+                    ->falseLabel('Open'),
             ], layout: FiltersLayout::AboveContent)
             ->deferFilters(false)
             ->recordActions([
