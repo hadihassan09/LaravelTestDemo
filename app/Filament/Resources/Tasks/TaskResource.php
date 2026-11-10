@@ -14,6 +14,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\CheckboxColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\SelectFilter;
@@ -50,9 +51,17 @@ class TaskResource extends Resource
             ->columns([
                 TextColumn::make('priority')
                     ->prefix('#'),
-                TextColumn::make('name'),
+                TextColumn::make('name')
+                    ->color(fn (Task $record): ?string => $record->completed_at ? 'gray' : null),
                 TextColumn::make('project.name')
                     ->placeholder('No project'),
+                CheckboxColumn::make('completed_at')
+                    ->label('Done')
+                    ->getStateUsing(fn (Task $record): bool => $record->completed_at !== null)
+                    ->updateStateUsing(fn (Task $record, bool $state) => $record->update([
+                        'completed_at' => $state ? now() : null,
+                    ]))
+                    ->tooltip(fn (Task $record): ?string => $record->completed_at?->toDayDateTimeString()),
                 TextColumn::make('created_at')
                     ->dateTime(),
                 TextColumn::make('updated_at')
